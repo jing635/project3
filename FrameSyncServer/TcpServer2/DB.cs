@@ -31,7 +31,7 @@ namespace TcpServer2
             }
         }
 
-        // 服务器启动时把所有在线标记刷成离线（上次可能是被强杀的）
+        // 服务器启动时把所有在线标记刷成离线
         public static void ResetAllOnline()
         {
             using (MySqlConnection conn = Open())
@@ -100,5 +100,6 @@ namespace TcpServer2
                 cmd.ExecuteNonQuery();
             }
         }
+
     }
 }
