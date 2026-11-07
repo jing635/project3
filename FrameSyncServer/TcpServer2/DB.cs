@@ -5,7 +5,6 @@ namespace TcpServer2
 {
     internal static class DB
     {
-        // ★★★ 改成你自己的 MySQL 密码 ★★★
         private const string ConnStr =
             "server=127.0.0.1;port=3306;database=userdata;user=root;password=password;charset=utf8mb4;";
 
@@ -101,5 +100,57 @@ namespace TcpServer2
             }
         }
 
+        // 读：查出这个玩家的设置
+        public static SettingData LoadSetting(int userId)
+        {
+            SettingData d = new SettingData();
+
+            using (MySqlConnection conn = Open())
+            using (MySqlCommand cmd = new MySqlCommand(
+                "SELECT isplaymusic, isplaysound, music, sound FROM `user` WHERE id = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("@id", userId);
+
+                using (MySqlDataReader r = cmd.ExecuteReader())
+                {
+                    if (!r.Read()) return d;      // 查不到就用默认值，不要崩
+
+                    d.isPlayMusic = Convert.ToInt32(r["isplaymusic"]) != 0;
+                    d.isPlaySound = Convert.ToInt32(r["isplaysound"]) != 0;
+                    d.music = Convert.ToSingle(r["music"]);
+                    d.sound = Convert.ToSingle(r["sound"]);
+                }
+            }
+
+            return d;
+        }
+
+        // 写：更新这个玩家的设置
+        public static void SaveSetting(int userId, SettingData d)
+        {
+            using (MySqlConnection conn = Open())
+            using (MySqlCommand cmd = new MySqlCommand(
+                "UPDATE `user` SET isplaymusic=@m, isplaysound=@s, music=@mv, sound=@sv WHERE id=@id", conn))
+            {
+                cmd.Parameters.AddWithValue("@m", d.isPlayMusic ? 1 : 0);
+                cmd.Parameters.AddWithValue("@s", d.isPlaySound ? 1 : 0);
+                cmd.Parameters.AddWithValue("@mv", d.music);
+                cmd.Parameters.AddWithValue("@sv", d.sound);
+                cmd.Parameters.AddWithValue("@id", userId);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+    }
+
+   
+    internal class SettingData
+    {
+        public bool isPlayMusic = true;
+        public bool isPlaySound = true;
+        public float music = 0.700f;
+        public float sound = 0.700f;
     }
 }
+
+

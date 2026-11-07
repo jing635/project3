@@ -6,6 +6,8 @@ public static class MsgId
     public const int RegisterReq = 103;   // 客户端 → 服务端：注册
     public const int RegisterRes = 104;   // 服务端 → 客户端：注册结果
     public const int KickNotify = 105;   // 服务端 → 客户端：你被顶号了
+    public const int SaveSettingReq = 201;   // 客户端 → 服务端：保存设置
+    public const int SaveSettingRes = 202;   // 服务端 → 客户端：保存结果
 
     // 2xx 大厅消息，阶段二再实现
 }
@@ -56,6 +58,10 @@ public class LoginRes : BaseMsg
     public int code;
     public int userId;
     public string message = "";
+    public bool isPlayMusic;
+    public bool isPlaySound;
+    public float music;        
+    public float sound;        
 
     public override int Id() { return MsgId.LoginRes; }
 
@@ -65,6 +71,10 @@ public class LoginRes : BaseMsg
         w.WriteInt(code);
         w.WriteInt(userId);
         w.WriteString(message);
+        w.WriteInt(isPlayMusic ? 1 : 0);
+        w.WriteInt(isPlaySound ? 1 : 0);
+        w.WriteFloat(music);
+        w.WriteFloat(sound);
         return w.ToArray();
     }
 
@@ -74,6 +84,10 @@ public class LoginRes : BaseMsg
         code = r.ReadInt();
         userId = r.ReadInt();
         message = r.ReadString();
+        isPlayMusic = r.ReadInt() == 1;
+        isPlaySound = r.ReadInt() == 1;
+        music = r.ReadFloat();
+        sound = r.ReadFloat();
     }
 }
 
@@ -142,5 +156,54 @@ public class KickNotify : BaseMsg
     {
         ByteReader r = new ByteReader(body);
         reason = r.ReadString();
+    }
+}
+
+// ============ 保存设置 ============
+public class SaveSettingReq : BaseMsg
+{
+    public bool isPlayMusic;
+    public bool isPlaySound;
+    public float music;
+    public float sound;
+
+    public override int Id() { return MsgId.SaveSettingReq; }
+
+    public override byte[] Write()
+    {
+        ByteWriter w = new ByteWriter();
+        w.WriteInt(isPlayMusic ? 1 : 0);
+        w.WriteInt(isPlaySound ? 1 : 0);
+        w.WriteFloat(music);
+        w.WriteFloat(sound);
+        return w.ToArray();
+    }
+
+    public override void Read(byte[] body)
+    {
+        ByteReader r = new ByteReader(body);
+        isPlayMusic = r.ReadInt() != 0;
+        isPlaySound = r.ReadInt() != 0;
+        music = r.ReadFloat();
+        sound = r.ReadFloat();
+    }
+}
+
+public class SaveSettingRes : BaseMsg
+{
+    public int code;
+
+    public override int Id() { return MsgId.SaveSettingRes; }
+
+    public override byte[] Write()
+    {
+        ByteWriter w = new ByteWriter();
+        w.WriteInt(code);
+        return w.ToArray();
+    }
+
+    public override void Read(byte[] body)
+    {
+        code = new ByteReader(body).ReadInt();
     }
 }

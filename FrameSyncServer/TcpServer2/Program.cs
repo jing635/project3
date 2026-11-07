@@ -114,10 +114,31 @@ namespace TcpServer2
             {
                 case MsgId.LoginReq: HandleLogin(session, body); break;
                 case MsgId.RegisterReq: HandleRegister(session, body); break;
+                case MsgId.SaveSettingReq: HandleSaveSetting(session, body); break;
                 default:
                     Console.WriteLine("未知消息号：" + msgId);
                     break;
             }
+        }
+
+        static void HandleSaveSetting(Session session, byte[] body)
+        {
+            if (session.UserId == 0) return;      
+
+            SaveSettingReq req = new SaveSettingReq();
+            req.Read(body);
+
+            DB.SaveSetting(session.UserId, new SettingData
+            {
+                isPlayMusic = req.isPlayMusic,
+                isPlaySound = req.isPlaySound,
+                music = Math.Clamp(req.music, 0, 1),      // 不信客户端，夹一下
+                sound = Math.Clamp(req.sound, 0, 1)
+            });
+
+            session.Send(new SaveSettingRes { code = Code.Ok });
+
+            Console.WriteLine("[设置] 用户 " + session.UserName + " 已保存 音乐=" + req.music + " 音效=" + req.sound);
         }
 
         // ---------------- 登录 + 顶号 ----------------
@@ -145,6 +166,18 @@ namespace TcpServer2
             session.UserId = userId;
             session.UserName = req.username;
 
+            // 这条连接之前登录过别人，先把旧会话摘掉
+            if (session.UserId != 0 && session.UserId != userId)
+            {
+                Session oldSession;
+                lock (SessionLock)
+                {
+                    if (Sessions.TryGetValue(session.UserId, out oldSession) && oldSession == session)
+                        Sessions.Remove(session.UserId);
+                }
+                DB.SetOnline(session.UserId, 0);
+            }
+
             // ---- 顶号：先把新会话塞进去，再处理旧的 ----
             Session old;
             lock (SessionLock)
@@ -162,14 +195,21 @@ namespace TcpServer2
 
             DB.SetOnline(userId, 1);
 
+            SettingData setting = DB.LoadSetting(userId);
+
             session.Send(new LoginRes
             {
                 code = Code.Ok,
                 userId = userId,
-                message = "登录成功"
+                message = "登录成功",
+                isPlayMusic = setting.isPlayMusic,
+                isPlaySound = setting.isPlaySound,
+                music = setting.music,
+                sound = setting.sound
             });
 
             Console.WriteLine("[登录] 成功：" + req.username + " userId=" + userId);
+
         }
 
         // ---------------- 注册 ----------------

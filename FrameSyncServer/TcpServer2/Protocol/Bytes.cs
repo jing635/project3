@@ -12,6 +12,11 @@ public class ByteWriter
         list.AddRange(BitConverter.GetBytes(v));
     }
 
+    public void WriteFloat(float v)
+    {
+        list.AddRange(BitConverter.GetBytes(v));
+    }
+
     public void WriteString(string s)
     {
         if (s == null) s = "";
@@ -45,6 +50,12 @@ public class ByteReader
         return v;
     }
 
+    public float ReadFloat()
+    {
+        float v = BitConverter.ToSingle(data, pos);
+        pos += 4;
+        return v;
+    }
     public string ReadString()
     {
         int len = ReadInt();
