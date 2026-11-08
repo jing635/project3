@@ -1,4 +1,6 @@
 ﻿// ============ 消息号 ============
+using TcpServer2;
+
 public static class MsgId
 {
     public const int LoginReq = 101;   // 客户端 → 服务端：登录
@@ -9,7 +11,7 @@ public static class MsgId
     public const int SaveSettingReq = 201;   // 客户端 → 服务端：保存设置
     public const int SaveSettingRes = 202;   // 服务端 → 客户端：保存结果
 
-    // 2xx 大厅消息，阶段二再实现
+    
 }
 
 // ============ 结果码 ============
@@ -61,7 +63,8 @@ public class LoginRes : BaseMsg
     public bool isPlayMusic;
     public bool isPlaySound;
     public float music;        
-    public float sound;        
+    public float sound;
+    public List<CharacterData> characterdatas = new List<CharacterData>();
 
     public override int Id() { return MsgId.LoginRes; }
 
@@ -75,6 +78,7 @@ public class LoginRes : BaseMsg
         w.WriteInt(isPlaySound ? 1 : 0);
         w.WriteFloat(music);
         w.WriteFloat(sound);
+        w.WriteCharacters(characterdatas);
         return w.ToArray();
     }
 
@@ -88,6 +92,7 @@ public class LoginRes : BaseMsg
         isPlaySound = r.ReadInt() == 1;
         music = r.ReadFloat();
         sound = r.ReadFloat();
+        characterdatas = r.ReadCharacters();
     }
 }
 

@@ -141,6 +141,33 @@ namespace TcpServer2
                 cmd.ExecuteNonQuery();
             }
         }
+
+        //得到受拥有的角色
+        public static List<CharacterData> GetCharacterDatas()
+        {
+            List<CharacterData> CharacterDatas = new List<CharacterData>();
+            using (MySqlConnection conn = Open())
+            using (MySqlCommand cmd = new MySqlCommand(
+                "SELECT character_id, character_name, character_path, character_skill1, character_skill2, character_skill3 FROM character", conn))
+            {
+                using (MySqlDataReader r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        CharacterData data = new CharacterData();
+                        data.CharacterId = r.GetInt32(0);
+                        data.CharacterName = r.GetString(1);
+                        data.CharacterImage = r.GetString(2);
+                        data.Skill1 = r.GetString(3);
+                        data.Skill2 = r.GetString(4);
+                        data.Skill3 = r.GetString(5);
+
+                        CharacterDatas.Add(data);
+                    }
+                }
+            }
+            return CharacterDatas;
+        }
     }
 
    
@@ -150,6 +177,16 @@ namespace TcpServer2
         public bool isPlaySound = true;
         public float music = 0.700f;
         public float sound = 0.700f;
+    }
+
+    public class CharacterData
+    {
+        public int CharacterId;
+        public string CharacterName = "";
+        public string CharacterImage = "";
+        public string Skill1 = "";
+        public string Skill2 = "";
+        public string Skill3 = "";
     }
 }
 

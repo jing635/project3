@@ -103,8 +103,10 @@ namespace TcpServer2
             finally
             {
                 RemoveSession(session);
+                string addr = "";
+                try { addr = session.Socket.RemoteEndPoint.ToString(); } catch { }
                 try { session.Socket.Close(); } catch { }
-                Console.WriteLine("客户端断开：" + session.Socket.RemoteEndPoint);
+                Console.WriteLine("客户端断开：" + addr);
             }
         }
 
@@ -163,19 +165,26 @@ namespace TcpServer2
                 return;
             }
 
+            int oldUserId = session.UserId;        // 先记下来
+
             session.UserId = userId;
             session.UserName = req.username;
 
-            // 这条连接之前登录过别人，先把旧会话摘掉
-            if (session.UserId != 0 && session.UserId != userId)
+            // 同一个连接换账号：把旧账号的会话摘掉
+            if (oldUserId != 0 && oldUserId != userId)
             {
-                Session oldSession;
+                bool removed = false;
                 lock (SessionLock)
                 {
-                    if (Sessions.TryGetValue(session.UserId, out oldSession) && oldSession == session)
-                        Sessions.Remove(session.UserId);
+                    Session oldSession;
+                    if (Sessions.TryGetValue(oldUserId, out oldSession) && oldSession == session)
+                    {
+                        Sessions.Remove(oldUserId);
+                        removed = true;
+                    }
                 }
-                DB.SetOnline(session.UserId, 0);
+
+                if (removed) DB.SetOnline(oldUserId, 0);
             }
 
             // ---- 顶号：先把新会话塞进去，再处理旧的 ----
@@ -205,7 +214,8 @@ namespace TcpServer2
                 isPlayMusic = setting.isPlayMusic,
                 isPlaySound = setting.isPlaySound,
                 music = setting.music,
-                sound = setting.sound
+                sound = setting.sound,
+                characterdatas = DB.GetCharacterDatas()
             });
 
             Console.WriteLine("[登录] 成功：" + req.username + " userId=" + userId);

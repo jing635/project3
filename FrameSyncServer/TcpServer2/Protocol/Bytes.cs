@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using TcpServer2;
 
 // 往 byte[] 里写数据
 public class ByteWriter
@@ -23,6 +24,25 @@ public class ByteWriter
         byte[] b = Encoding.UTF8.GetBytes(s);
         WriteInt(b.Length);         
         list.AddRange(b);
+    }
+
+    public void WriteCharacters(List<CharacterData> characters)
+    {
+        WriteInt(characters.Count);
+        for (int i = 0; i < characters.Count; i++)
+        {
+            WriteCharacter(characters[i]);
+        }
+    }
+
+    private void WriteCharacter(CharacterData data)
+    {
+        WriteInt(data.CharacterId);
+        WriteString(data.CharacterName);
+        WriteString(data.CharacterImage);
+        WriteString(data.Skill1);
+        WriteString(data.Skill2);
+        WriteString(data.Skill3);
     }
 
     public byte[] ToArray()
@@ -49,7 +69,6 @@ public class ByteReader
         pos += 4;
         return v;
     }
-
     public float ReadFloat()
     {
         float v = BitConverter.ToSingle(data, pos);
@@ -62,5 +81,27 @@ public class ByteReader
         string s = Encoding.UTF8.GetString(data, pos, len);
         pos += len;
         return s;
+    }
+    public List<CharacterData> ReadCharacters()
+    {
+        int count = ReadInt();
+        List<CharacterData> characterdatas = new List<CharacterData>();
+        for (int i = 0; i < count; i++)
+        { 
+            characterdatas.Add(ReadCharacter());
+        }
+        return characterdatas;
+
+    }
+    private CharacterData ReadCharacter()
+    {
+        CharacterData data = new CharacterData();
+        data.CharacterId = ReadInt();
+        data.CharacterName = ReadString();
+        data.CharacterImage = ReadString();
+        data.Skill1 = ReadString();
+        data.Skill2 = ReadString();
+        data.Skill3 = ReadString();
+        return data;
     }
 }
