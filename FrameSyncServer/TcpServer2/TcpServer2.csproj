@@ -11,7 +11,8 @@
 
 	<!-- 直接引用 Unity 里的协议文件，只维护一份 -->
 	<ItemGroup>
-		<Compile Include="..\..\..\My-project(3)\Assets\Scripts\Protocol\*.cs" />
+		<Compile Include="..\..\..\My project (3)\Assets\Scripts\Protocol\*.cs"
+		  LinkBase="Protocol" />
 	</ItemGroup>
 
 </Project>
