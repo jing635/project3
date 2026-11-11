@@ -148,7 +148,7 @@ namespace TcpServer2
             List<CharacterData> CharacterDatas = new List<CharacterData>();
             using (MySqlConnection conn = Open())
             using (MySqlCommand cmd = new MySqlCommand(
-                "SELECT character_id, character_name, character_path, character_skill1, character_skill2, character_skill3 FROM character", conn))
+                "SELECT character_id, character_name, character_path, character_skill1, character_skill2, character_skill3 FROM character_info", conn))
             {
                 using (MySqlDataReader r = cmd.ExecuteReader())
                 {
@@ -179,15 +179,7 @@ namespace TcpServer2
         public float sound = 0.700f;
     }
 
-    public class CharacterData
-    {
-        public int CharacterId;
-        public string CharacterName = "";
-        public string CharacterImage = "";
-        public string Skill1 = "";
-        public string Skill2 = "";
-        public string Skill3 = "";
-    }
+    
 }
 
 

@@ -1,14 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>TcpServer3</RootNamespace>
+		<AssemblyName>TcpServer3</AssemblyName>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MySql.Data" Version="26.10.0" />
-  </ItemGroup>
+	<!-- 直接引用 Unity 里的协议文件，只维护一份 -->
+	<ItemGroup>
+		<Compile Include="..\..\..\My-project(3)\Assets\Scripts\Protocol\*.cs" />
+	</ItemGroup>
 
 </Project>

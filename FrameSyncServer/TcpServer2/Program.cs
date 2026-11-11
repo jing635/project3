@@ -117,10 +117,22 @@ namespace TcpServer2
                 case MsgId.LoginReq: HandleLogin(session, body); break;
                 case MsgId.RegisterReq: HandleRegister(session, body); break;
                 case MsgId.SaveSettingReq: HandleSaveSetting(session, body); break;
+                case MsgId.MatchReq: HandleMatch(session, body); break;
+                case MsgId.MatchCancelReq: Matchmaker.Cancel(session); break;
                 default:
                     Console.WriteLine("未知消息号：" + msgId);
                     break;
             }
+        }
+
+        static void HandleMatch(Session session, byte[] body)
+        {
+            if (session.UserId == 0) return;      // 没登录不能匹配
+
+            MatchReq req = new MatchReq();
+            req.Read(body);
+
+            Matchmaker.Enqueue(session, req.characterId);
         }
 
         static void HandleSaveSetting(Session session, byte[] body)
@@ -244,6 +256,7 @@ namespace TcpServer2
         static void RemoveSession(Session session)
         {
             if (session.UserId == 0) return;
+            Matchmaker.Remove(session.UserId);
 
             lock (SessionLock)
             {
