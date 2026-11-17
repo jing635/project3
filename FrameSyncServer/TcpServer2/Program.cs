@@ -132,7 +132,7 @@ namespace TcpServer2
             MatchReq req = new MatchReq();
             req.Read(body);
 
-            Matchmaker.Enqueue(session, req.characterId);
+            Matchmaker.Enqueue(session, req.UserId);
         }
 
         static void HandleSaveSetting(Session session, byte[] body)
@@ -227,7 +227,7 @@ namespace TcpServer2
                 isPlaySound = setting.isPlaySound,
                 music = setting.music,
                 sound = setting.sound,
-                characterdatas = DB.GetCharacterDatas()
+                user_CharacterData = DB.GetUser_CharacterDatas(session)
             });
 
             Console.WriteLine("[登录] 成功：" + req.username + " userId=" + userId);

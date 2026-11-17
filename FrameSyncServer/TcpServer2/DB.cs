@@ -143,30 +143,28 @@ namespace TcpServer2
         }
 
         //得到受拥有的角色
-        public static List<CharacterData> GetCharacterDatas()
+        public static List<User_CharacterData> GetUser_CharacterDatas(Session session)
         {
-            List<CharacterData> CharacterDatas = new List<CharacterData>();
+            List<User_CharacterData> User_CharacterDatas = new List<User_CharacterData>();
             using (MySqlConnection conn = Open())
             using (MySqlCommand cmd = new MySqlCommand(
-                "SELECT character_id, character_name, character_path, character_skill1, character_skill2, character_skill3 FROM character_info", conn))
+                "SELECT character_name, character_level, shards FROM user_character WHERE username=@username", conn))
             {
+                cmd.Parameters.AddWithValue("@username", session.UserName);
                 using (MySqlDataReader r = cmd.ExecuteReader())
                 {
                     while (r.Read())
                     {
-                        CharacterData data = new CharacterData();
-                        data.CharacterId = r.GetInt32(0);
-                        data.CharacterName = r.GetString(1);
-                        data.CharacterImage = r.GetString(2);
-                        data.Skill1 = r.GetString(3);
-                        data.Skill2 = r.GetString(4);
-                        data.Skill3 = r.GetString(5);
+                        User_CharacterData data = new User_CharacterData();
+                        data.CharacterName = r.GetString(2);
+                        data.CharacterLevel = r.GetInt32(3);
+                        data.CharacterShards = r.GetInt32(4);
 
-                        CharacterDatas.Add(data);
+                        User_CharacterDatas.Add(data);
                     }
                 }
             }
-            return CharacterDatas;
+            return User_CharacterDatas;
         }
     }
 

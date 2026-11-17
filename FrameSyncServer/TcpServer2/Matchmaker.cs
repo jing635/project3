@@ -7,7 +7,6 @@ namespace TcpServer2
     {
         public int UserId;
         public string UserName;
-        public int CharacterId;
         public Session Session;
     }
 
@@ -22,7 +21,7 @@ namespace TcpServer2
         private static int nextRoomId = 1;
 
         // 加入队列。够两个人就地配对，给双方发"匹配成功"
-        public static void Enqueue(Session session, int characterId)
+        public static void Enqueue(Session session, int userid)
         {
             MatchPlayer a = null;
             MatchPlayer b = null;
@@ -46,7 +45,6 @@ namespace TcpServer2
                     {
                         UserId = session.UserId,
                         UserName = session.UserName,
-                        CharacterId = characterId,
                         Session = session
                     });
 
@@ -60,12 +58,6 @@ namespace TcpServer2
                 }
             }
 
-            if (alreadyInQueue)
-            {
-                session.Send(new MatchRes { code = MatchCode.Queued, message = "已经在匹配队列里了" });
-                return;
-            }
-
             if (a == null)
             {
                 session.Send(new MatchRes { code = MatchCode.Queued, message = "正在匹配对手..." });
@@ -73,26 +65,23 @@ namespace TcpServer2
                 return;
             }
 
+            session.Send(new MatchRes { code = MatchCode.Succeed, message = "匹配成功" });
             System.Console.WriteLine("[匹配] 配对成功：房间 " + roomId + "，" + a.UserName + " vs " + b.UserName);
 
             // 房间号交给双方，各发一次，注意"我方/对方"是反的
-            a.Session.Send(new MatchSuccessNotify
+            a.Session.Send(new MatchRes
             {
                 ip = BattleIp,
                 port = BattlePort,
                 roomId = roomId,
-                myCharacterId = a.CharacterId,
-                enemyCharacterId = b.CharacterId,
                 enemyName = b.UserName
             });
 
-            b.Session.Send(new MatchSuccessNotify
+            b.Session.Send(new MatchRes
             {
                 ip = BattleIp,
                 port = BattlePort,
                 roomId = roomId,
-                myCharacterId = b.CharacterId,
-                enemyCharacterId = a.CharacterId,
                 enemyName = a.UserName
             });
         }

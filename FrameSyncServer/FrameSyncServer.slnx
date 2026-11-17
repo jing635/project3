@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="TcpServer2/TcpServer2.csproj" />
+  <Project Path="TcpServer3/TcpServer3.csproj" />
 </Solution>
