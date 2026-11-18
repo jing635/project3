@@ -129,10 +129,7 @@ namespace TcpServer2
         {
             if (session.UserId == 0) return;      // 没登录不能匹配
 
-            MatchReq req = new MatchReq();
-            req.Read(body);
-
-            Matchmaker.Enqueue(session, req.UserId);
+            Matchmaker.Enqueue(session);
         }
 
         static void HandleSaveSetting(Session session, byte[] body)

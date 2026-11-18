@@ -1,5 +1,6 @@
-﻿using System;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Utilities;
+using System;
 
 namespace TcpServer2
 {
@@ -156,9 +157,9 @@ namespace TcpServer2
                     while (r.Read())
                     {
                         User_CharacterData data = new User_CharacterData();
-                        data.CharacterName = r.GetString(2);
-                        data.CharacterLevel = r.GetInt32(3);
-                        data.CharacterShards = r.GetInt32(4);
+                        data.CharacterName = r.GetString("character_name");
+                        data.CharacterLevel = r.GetInt32("character_level");
+                        data.CharacterShards = r.GetInt32("shards");
 
                         User_CharacterDatas.Add(data);
                     }
