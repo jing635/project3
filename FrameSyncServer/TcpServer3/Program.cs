@@ -11,7 +11,8 @@ namespace TcpServer3
         public Socket Socket;
         public int UserId;
         public int RoomId;
-        public int CharacterId;
+        public string CharacterName1;
+        public string CharacterName2;
         public int PlayerIndex = -1;
 
         public void Send(BaseMsg msg)
@@ -101,14 +102,14 @@ namespace TcpServer3
         {
             switch (msgId)
             {
-                case MsgId.JoinBattleReq: HandleJoinBattle(session, body); break;
+                case MsgId.ChooseCharacterReq: HandleChooseCharacter(session, body); break;
                 default: Console.WriteLine("战斗服收到未知消息号：" + msgId); break;
             }
         }
 
-        static void HandleJoinBattle(Session session, byte[] body)
+        static void HandleChooseCharacter(Session session, byte[] body)
         {
-            JoinBattleReq req = new JoinBattleReq();
+            ChooseCharacterReq req = new ChooseCharacterReq();
             req.Read(body);
 
             Room room = null;
@@ -132,7 +133,8 @@ namespace TcpServer3
                 {
                     session.UserId = req.userId;
                     session.RoomId = req.roomId;
-                    session.CharacterId = req.characterId;
+                    session.CharacterName1 = req.CharacterName1;
+                    session.CharacterName2 = req.CharacterName2;
                     session.PlayerIndex = room.Players.Count;
 
                     room.Players.Add(session);
@@ -150,7 +152,7 @@ namespace TcpServer3
             session.Send(new JoinBattleRes { code = 0, message = "已进入房间" });
 
             Console.WriteLine("[房间 " + req.roomId + "] 玩家 " + req.userId
-                + " 进入，角色 " + req.characterId + "，当前 " + (other == null ? 1 : 2) + " 人");
+                + " 进入，角色 " + req.CharacterName1 + "、" + req.CharacterName2 + "，当前 " + (other == null ? 1 : 2) + " 人");
 
             if (other == null)
             {
@@ -161,23 +163,29 @@ namespace TcpServer3
             // 两人到齐 → 开局
             Console.WriteLine("[房间 " + req.roomId + "] 双方就位，开始战斗！");
 
-            other.Send(new BattleStartNotify
+            other.Send(new ChooseCharacterRes
             {
                 roomId = room.RoomId,
                 playerIndex = 0,
-                myCharacterId = other.CharacterId,
-                enemyCharacterId = session.CharacterId,
+                CharacterName3 = other.CharacterName1,
+                CharacterName4 = other.CharacterName2,
+                CharacterName1 = session.CharacterName1,
+                CharacterName2 = session.CharacterName2,
                 randomSeed = room.Seed
             });
 
-            session.Send(new BattleStartNotify
+
+            session.Send(new ChooseCharacterRes
             {
                 roomId = room.RoomId,
                 playerIndex = 1,
-                myCharacterId = session.CharacterId,
-                enemyCharacterId = other.CharacterId,
+                CharacterName3 = other.CharacterName1,
+                CharacterName4 = other.CharacterName2,
+                CharacterName1 = session.CharacterName1,
+                CharacterName2 = session.CharacterName2,
                 randomSeed = room.Seed
             });
+
         }
 
         static void LeaveRoom(Session session)
